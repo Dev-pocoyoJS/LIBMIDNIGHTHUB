@@ -216,6 +216,78 @@ function Kavo.CreateLib(kavName, themeList)
 
     Kavo:DraggingEnabled(MainHeader, Main)
 
+    -- Botão flutuante com logo para abrir/fechar a UI
+    local toggleButton = Instance.new("ImageButton")
+    local toggleCorner = Instance.new("UICorner")
+    local toggleStroke = Instance.new("UIStroke")
+
+    toggleButton.Name = "LogoToggle"
+    toggleButton.Parent = ScreenGui
+    toggleButton.BackgroundColor3 = themeList.Header
+    toggleButton.Size = UDim2.new(0, 48, 0, 48)
+    toggleButton.Position = UDim2.new(0, 12, 0.5, -24)
+    toggleButton.ZIndex = 10
+    toggleButton.Image = "rbxassetid://84427155383225"
+    toggleButton.ScaleType = Enum.ScaleType.Fit
+    toggleButton.ImageTransparency = 0
+
+    toggleCorner.CornerRadius = UDim.new(0, 10)
+    toggleCorner.Parent = toggleButton
+
+    toggleStroke.Color = themeList.SchemeColor
+    toggleStroke.Thickness = 2
+    toggleStroke.Parent = toggleButton
+
+    -- Torna o botão arrastável também
+    Kavo:DraggingEnabled(toggleButton, toggleButton)
+
+    local uiVisible = true
+
+    toggleButton.MouseButton1Click:Connect(function()
+        uiVisible = not uiVisible
+        if uiVisible then
+            Main.Visible = true
+            game.TweenService:Create(Main, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Size = UDim2.new(0, 525, 0, 318),
+            }):Play()
+            game.TweenService:Create(toggleButton, TweenInfo.new(0.2), {
+                ImageTransparency = 0,
+                BackgroundColor3 = themeList.Header,
+            }):Play()
+            toggleStroke.Color = themeList.SchemeColor
+        else
+            game.TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+                Size = UDim2.new(0, 0, 0, 0),
+            }):Play()
+            game.TweenService:Create(toggleButton, TweenInfo.new(0.2), {
+                ImageTransparency = 0.3,
+                BackgroundColor3 = Color3.fromRGB(20, 20, 25),
+            }):Play()
+            wait(0.2)
+            Main.Visible = false
+        end
+    end)
+
+    toggleButton.MouseEnter:Connect(function()
+        game.TweenService:Create(toggleButton, TweenInfo.new(0.15), {
+            Size = UDim2.new(0, 54, 0, 54),
+            Position = UDim2.new(toggleButton.Position.X.Scale, toggleButton.Position.X.Offset - 3, toggleButton.Position.Y.Scale, toggleButton.Position.Y.Offset - 3),
+        }):Play()
+    end)
+    toggleButton.MouseLeave:Connect(function()
+        game.TweenService:Create(toggleButton, TweenInfo.new(0.15), {
+            Size = UDim2.new(0, 48, 0, 48),
+            Position = UDim2.new(toggleButton.Position.X.Scale, toggleButton.Position.X.Offset + 3, toggleButton.Position.Y.Scale, toggleButton.Position.Y.Offset + 3),
+        }):Play()
+    end)
+
+    coroutine.wrap(function()
+        while wait() do
+            toggleStroke.Color = themeList.SchemeColor
+            toggleButton.BackgroundColor3 = uiVisible and themeList.Header or Color3.fromRGB(20, 20, 25)
+        end
+    end)()
+
     blurFrame.Name = "blurFrame"
     blurFrame.Parent = pages
     blurFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
